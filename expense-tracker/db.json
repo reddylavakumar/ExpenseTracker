@@ -1,0 +1,37 @@
+{
+  "expenses": [
+    {
+      "id": "1",
+      "title": "Alice",
+      "amount": "10000",
+      "currency": "INR",
+      "convertedAmount": "100000",
+      "category": "Food & Drinks",
+      "notes": "Spent on Food and Drinks",
+      "data": "08-07-2025",
+      "createdAt": "08-07-2025"
+    },
+    {
+      "id": "2",
+      "title": "Bob",
+      "amount": "20000",
+      "currency": "EUR",
+      "convertedAmount": "20000",
+      "category": "clothes",
+      "notes": "Spent on clothes",
+      "data": "07-07-2025",
+      "createdAt": "07-07-2025"
+    },
+    {
+      "id": 3,
+      "title": "Lava",
+      "amount": "20000",
+      "currency": "EUR",
+      "convertedAmount": "20000",
+      "category": "clothes",
+      "notes": "Spent on clothes",
+      "data": "07-07-2025",
+      "createdAt": "07-07-2025"
+    }
+  ]
+}
