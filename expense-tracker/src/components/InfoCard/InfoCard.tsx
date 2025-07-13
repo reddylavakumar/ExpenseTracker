@@ -9,8 +9,8 @@ const InfoCard = ({ item }: { item: cardItem }) => {
     return (
         <div className=" bg-white border-1 p-4 pt-6 pb-6 rounded-lg shadow-sm flex w-1/3">
             <div className="flex justify-center items-center w-20">
-                {/* <img className="h-10 p-1 rounded-sm bg-blue-500" src={item?.image_src} alt="logo" /> */}
-                <div className="h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400">
+                <div className={`h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400`}>
+                    {/* <div className={`h-12 w-12 bg-${red}-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400`}> */}
                     <img
                         src={item?.image_src}
                         alt="Wallet Icon"

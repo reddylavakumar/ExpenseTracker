@@ -22,7 +22,7 @@ export const updateExpense = async (id: number, data: any): Promise<any> => {
   return res.data;
 };
 
-export const deleteExpense = async (id: number): Promise<any> => {
+export const deleteExpense = async (id: string): Promise<any> => {
   const res = await axios.delete(`${API_URL}/${id}`);
   return res.data;
 };

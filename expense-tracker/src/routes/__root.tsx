@@ -11,7 +11,7 @@ function RootComponent() {
 ">
       <Header />
       <div className="flex flex-row mt-0 h-screen">
-        <div className="bg-white-500 p-1 border-r-2 overflow-auto scrollbar-thin">
+        <div className="bg-white-500 p-1 border-r-2 overflow-auto scrollbar-thin w-1/6 flex justify-center">
           <Sidebar />
         </div>
         <main className="flex-1 bg-gray-100 p-4 h-[95vh] overflow-x-scroll scrollbar-thin">

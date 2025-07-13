@@ -11,24 +11,24 @@ const months = [
 const BarChart: React.FC = () => {
     const { expenseList } = useExpenseStore();
 
-    const monthlyIncome = Array(12).fill(0);
+    const monthlyExpenses = Array(12).fill(0);
 
     expenseList.forEach((entry) => {
-        if (entry.isIncome && entry.date) {
-            const [day, monthStr, year] = entry.date.split("-");
-            const monthIndex = parseInt(monthStr, 10) - 1;
-            const amount = parseFloat(entry.convertedAmount || entry.amount || "0");
+        if (!entry?.date || entry.isIncome) return;
 
-            if (!isNaN(monthIndex) && monthIndex >= 0 && monthIndex <= 11) {
-                monthlyIncome[monthIndex] += amount;
-            }
+        const [day, monthStr] = entry.date.split("-");
+        const monthIndex = parseInt(monthStr, 10) - 1;
+        const amount = parseFloat(entry?.convertedAmount || "0");
+
+        if (!isNaN(monthIndex) && monthIndex >= 0 && monthIndex <= 11) {
+            monthlyExpenses[monthIndex] += amount;
         }
     });
 
     const series = [
         {
-            name: "Income",
-            data: monthlyIncome,
+            name: "Expense",
+            data: monthlyExpenses,
         },
     ];
 
@@ -59,7 +59,7 @@ const BarChart: React.FC = () => {
         fill: {
             opacity: 1,
         },
-        colors: ["#6366F1"],
+        colors: ["#EF4444"],
     };
 
     return (

@@ -1,36 +1,35 @@
 import { Plus } from 'lucide-react'
 import { Button } from '../ui/button'
-import BarChart from './barchart/BarChart'
-import Table from './table/Table'
+import { ExpenseDialogBox } from './expensedialogbox/ExpenseDialogbox'
 import { useState } from 'react'
-import { IncomeDialogBox } from './incomedialog/IncomeDialogBox'
-
-const Income = () => {
+import BarChart from './barchart/barchart'
+import Table from './table/Table'
+const Expense = () => {
     const [open, setOpen] = useState(false)
-
     return (
         <div >
             <div >
                 <div className='flex justify-self-end'>
                     <Button className='hover:cursor-pointer' variant={"default"} onClick={() => setOpen(true)}>
                         <Plus />
-                        Add Income</Button>
+                        Add Expense</Button>
                 </div>
                 <div>
                     <BarChart />
                 </div>
                 <div className='mt-5'>
                     <div className=" bg-white border-1 p-4 rounded-lg shadow-sm">
-                        <div className="text-xl font-bold">Recent Incomes</div>
+                        <div className="text-xl font-bold">Recent Expenses</div>
                         <div className='mt-4'>
                             <Table />
                         </div>
                     </div>
                 </div>
             </div>
-            {open && <IncomeDialogBox open={open} onOpenChange={setOpen} />}
-        </div >
+            <ExpenseDialogBox open={open} onOpenChange={setOpen} />
+
+        </div>
     )
 }
 
-export default Income
+export default Expense

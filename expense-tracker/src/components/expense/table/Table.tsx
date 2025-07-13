@@ -19,7 +19,7 @@ const Table: React.FC = () => {
     const [data, setData] = useState<Person[]>([]);
 
     useEffect(() => {
-        const incomeList = expenseList.filter((item) => item?.isIncome);
+        const incomeList = expenseList.filter((item) => !item?.isIncome);
         const list = incomeList.map((item) => ({
             image: item?.image_src || '',
             incomeFrom: item?.title || '',
@@ -34,14 +34,14 @@ const Table: React.FC = () => {
             //     accessorKey: 'image',
             //     header: 'Image',
             //     Cell: ({ cell }) => (
-            //         <img src={cell.getValue<string>()} alt="income" className='rounded-xl' width={50} height={50} />
+            //         <img src={cell.getValue<string>()} alt="income" className='rounded-xl' width={40} height={40} />
             //     ),
             //     enableSorting: false,
             //     enableColumnFilter: false,
             //     enableHiding: false,
             //     enableColumnActions: false,
             // },
-            { accessorKey: 'incomeFrom', header: 'Income Source' },
+            { accessorKey: 'incomeFrom', header: 'Spent On' },
             { accessorKey: 'Amount', header: 'Amount' },
             {
                 accessorKey: 'Action', header: 'Action',

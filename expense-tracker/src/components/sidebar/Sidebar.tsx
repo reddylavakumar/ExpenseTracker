@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { BanknoteArrowDownIcon, BanknoteArrowUpIcon, LayoutDashboardIcon } from "lucide-react";
 
 const Sidebar = () => {
     return (
@@ -6,34 +7,46 @@ const Sidebar = () => {
         <div className="w-50 bg-white-900 text-black p-4 space-y-4">
             <nav>
                 <ul className="space-y-2">
-                    <li>
+                    <li className="flex">
                         <Link
                             to="/"
-                            className="block px-4 py-2 rounded-md
-                            bg-purple-50
-                            hover:bg-purple-100
-                            transition-all ease-in-out duration-300
-                            "
+                            className="flex items-center gap-4 px-4 py-2 rounded-md min-w-45
+                            bg-purple-50 mt-5 hover:bg-purple-100
+                            transition-all ease-in-out duration-300"
                             activeProps={{
                                 className: "bg-purple-700 text-white hover:bg-purple-700",
                             }}
                         >
-                            Home
+                            <LayoutDashboardIcon />
+                            Dashboard
                         </Link>
                     </li>
                     <li>
                         <Link
                             to="/income"
-                            className="block px-4 py-2 rounded-md
-                            bg-purple-50
-                            hover:bg-purple-100
-                            transition-all ease-in-out duration-300
-                            "
+                            className="flex items-center gap-4 px-4 py-2 rounded-md min-w-45
+               bg-purple-50 mt-5 hover:bg-purple-100
+               transition-all ease-in-out duration-300"
                             activeProps={{
                                 className: "bg-purple-700 text-white hover:bg-purple-700",
                             }}
                         >
-                            Income
+                            <BanknoteArrowUpIcon className="w-5 h-5" />
+                            <span>Income</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            to="/expense"
+                            className="flex items-center gap-4 px-4 py-2 rounded-md min-w-45
+               bg-purple-50 mt-5 hover:bg-purple-100
+               transition-all ease-in-out duration-300"
+                            activeProps={{
+                                className: "bg-purple-700 text-white hover:bg-purple-700",
+                            }}
+                        >
+                            <BanknoteArrowDownIcon />
+                            Expense
                         </Link>
                     </li>
 

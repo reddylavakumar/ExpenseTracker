@@ -1,7 +1,7 @@
-// components/DonutChart.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import useExpenseStore from "@/store/useAppStore";
 
 type cardItem = {
     id: number;
@@ -10,23 +10,57 @@ type cardItem = {
     image_src: string;
 };
 
-const InfoCardData: cardItem[] = [
-    { id: 1, text: "Total Balance", amount: "19280", image_src: "src/assets/wallet.png" },
-    { id: 2, text: "Total Expense", amount: "10000", image_src: "src/assets/wallet.png" },
-    { id: 3, text: "Total Savings", amount: "9280", image_src: "src/assets/wallet.png" },
-];
-
 const DonutChart: React.FC = () => {
-    const [series, setSeries] = useState<number[]>(
-        InfoCardData.map((item) => parseInt(item?.amount))
-    );
+    const { expenseList } = useExpenseStore();
+
+    const [InfoCardData, setInfoCardData] = useState<cardItem[]>([])
+
+    useEffect(() => {
+        const totalIncome = expenseList?.filter((item) => item?.isIncome).reduce((sum, item) => sum + Number(item.convertedAmount), 0);
+        console.log(totalIncome, "total income");
+
+        const totalExpense = expenseList?.filter((item) => !(item?.isIncome)).reduce((sum, item) => sum + Number(item.convertedAmount), 0)
+        console.log(totalExpense, "total expense");
+
+        const totalBalance = totalIncome - totalExpense
+        console.log(totalBalance, "total balance");
+
+        let data = [{
+            id: 1,
+            text: "Total Balance",
+            amount: totalBalance,
+            image_src: "src/assets/wallet.png",
+            bgcolor: "blue"
+        },
+        {
+            id: 2,
+            text: "Total Income",
+            amount: totalIncome,
+            image_src: "src/assets/wallet.png",
+            bgcolor: "orange"
+
+        }
+            ,
+        {
+            id: 3,
+            text: "Total Expense",
+            amount: totalExpense,
+            image_src: "src/assets/wallet.png",
+            bgcolor: "red"
+        }
+        ]
+        setInfoCardData(data)
+
+    }, [])
+
+    const series: number[] = InfoCardData.map((item) => parseInt(item.amount));
 
     const options: ApexOptions = {
         chart: {
             type: "donut",
             width: 380,
         },
-        labels: InfoCardData.map((item) => item.text),
+        labels: InfoCardData?.map((item) => item.text),
         dataLabels: {
             enabled: false,
         },
@@ -47,7 +81,6 @@ const DonutChart: React.FC = () => {
             },
         ],
     };
-
 
     return (
 
