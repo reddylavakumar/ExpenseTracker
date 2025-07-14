@@ -133,17 +133,14 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                 // Edit 
                 await updateExpense(id, formattedData)
                 console.log("Expense updated successfully")
-                toast.success("Expense updated successfully")
             } else {
                 // Add
                 await addExpense(formattedData)
                 console.log("Expense added successfully")
-                toast.success("Expense added successfully")
-
             }
 
             await fetchExpenses()
-
+            toast.success("Record deleted successfully")
 
             reset()
             setImagePreview(null)

@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { Download, Plus } from 'lucide-react'
 import { Button } from '../ui/button'
 import { ExpenseDialogBox } from './expensedialogbox/ExpenseDialogbox'
 import { useState } from 'react'
@@ -19,7 +19,16 @@ const Expense = () => {
                 </div>
                 <div className='mt-5'>
                     <div className=" bg-white border-1 p-4 rounded-lg shadow-sm">
-                        <div className="text-xl font-bold">Recent Expenses</div>
+                        <div className="text-xl font-bold flex justify-between">
+                            <div>
+                                Recent Expenses
+                            </div>
+                            <div>
+                                <Button onClick={() => { }}>
+                                    <Download />
+                                    Download</Button>
+                            </div>
+                        </div>
                         <div className='mt-4'>
                             <Table />
                         </div>

@@ -4,6 +4,7 @@ import Financialoverview from "./financialoverview/Financialoverview"
 import RecentTransaction from "./recenttransaction/RecentTransaction"
 import { useEffect, useState } from "react";
 import { CircleXIcon, MessageSquareWarningIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
 type cardItem = {
     id: number,
@@ -89,12 +90,12 @@ const Dashboard = () => {
                             You have reached your monthly budget limit.
                         </span>
                     </div>
-                    <button
+                    <Button variant={"ghost"}
                         onClick={() => setIsBudgetExceeded(false)}
                         className="text-red-500 hover:text-red-700 hover:cursor-pointer transition duration-150 ease-in-out"
                     >
                         <CircleXIcon className="w-5 h-5" />
-                    </button>
+                    </Button>
                 </div>
             )}
 
