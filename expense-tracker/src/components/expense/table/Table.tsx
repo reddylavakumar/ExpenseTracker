@@ -7,20 +7,49 @@ import {
 import useExpenseStore from '@/store/useAppStore';
 import { SquarePen, Trash2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ExpenseDialogBox } from '../expensedialogbox/ExpenseDialogbox';
+// import { deleteExpense } from '@/services/api/expenseApi';
 
 type Person = {
     image: string;
     incomeFrom: string;
     Amount: number;
+    id: string
 };
 
 const Table: React.FC = () => {
-    const { expenseList } = useExpenseStore();
+    const { expenseList, fetchExpenses } = useExpenseStore();
     const [data, setData] = useState<Person[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [editExpenseId, setEditExpenseId] = useState<string | undefined>(undefined)
+
+    const handleEdit = (expenseId: string) => {
+        setEditExpenseId(expenseId)
+        setIsDialogOpen(true)
+    }
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await fetch(`http://localhost:3001/expenses/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                await fetchExpenses()
+                console.log('Record deleted successfully.');
+            } else {
+                console.error(`Failed to delete the record. Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error while deleting the record:', error);
+        }
+    };
+
 
     useEffect(() => {
         const incomeList = expenseList.filter((item) => !item?.isIncome);
         const list = incomeList.map((item) => ({
+            id: item?.id,
             image: item?.image_src || '',
             incomeFrom: item?.title || '',
             Amount: parseFloat(item?.convertedAmount || item?.amount || '0'),
@@ -30,29 +59,21 @@ const Table: React.FC = () => {
 
     const columns = useMemo<MRT_ColumnDef<Person>[]>(
         () => [
-            // {
-            //     accessorKey: 'image',
-            //     header: 'Image',
-            //     Cell: ({ cell }) => (
-            //         <img src={cell.getValue<string>()} alt="income" className='rounded-xl' width={40} height={40} />
-            //     ),
-            //     enableSorting: false,
-            //     enableColumnFilter: false,
-            //     enableHiding: false,
-            //     enableColumnActions: false,
-            // },
             { accessorKey: 'incomeFrom', header: 'Spent On' },
             { accessorKey: 'Amount', header: 'Amount' },
             {
                 accessorKey: 'Action', header: 'Action',
                 enableSorting: false,
                 enableColumnActions: false,
-                Cell: ({ cell }) => (
+                Cell: ({ row }) => (
                     <div className='flex gap-5'>
-                        <Button variant={"secondary"} className='bg-blue-200 hover:cursor-pointer hover:bg-blue-300 transition-all ease-in'>
+                        <Button variant={"secondary"} className='bg-blue-200 hover:cursor-pointer hover:bg-blue-300 transition-all ease-in' onClick={() => handleEdit(row?.original?.id)
+                        }>
                             <SquarePen />
                         </Button>
-                        <Button variant={"secondary"} className='bg-red-200 hover:cursor-pointer hover:bg-red-300 transition-all ease-in'>
+                        <Button variant={"secondary"} className='bg-red-200 hover:cursor-pointer hover:bg-red-300 transition-all ease-in'
+                            onClick={() => handleDelete(row.original.id)}
+                        >
                             <Trash2Icon />
                         </Button>
                     </div>
@@ -70,7 +91,10 @@ const Table: React.FC = () => {
         enableDensityToggle: false,
     });
 
-    return <MaterialReactTable table={table} />;
+    return <>
+        <MaterialReactTable table={table} />
+        {isDialogOpen && <ExpenseDialogBox open={isDialogOpen} onOpenChange={setIsDialogOpen} id={editExpenseId} />}
+    </>
 };
 
 export default Table;

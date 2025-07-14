@@ -7,7 +7,7 @@ export const getExpenses = async (): Promise<any[]> => {
   return res.data;
 };
 
-export const getExpenseById = async (id: number): Promise<any> => {
+export const getExpenseById = async (id: string): Promise<any> => {
   const res = await axios.get(`${API_URL}/${id}`);
   return res.data;
 };
@@ -17,7 +17,7 @@ export const addExpense = async (data: any): Promise<any> => {
   return res.data;
 };
 
-export const updateExpense = async (id: number, data: any): Promise<any> => {
+export const updateExpense = async (id: string, data: any): Promise<any> => {
   const res = await axios.put(`${API_URL}/${id}`, data);
   return res.data;
 };

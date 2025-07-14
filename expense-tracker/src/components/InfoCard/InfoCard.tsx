@@ -3,13 +3,16 @@ type cardItem = {
     text: string,
     amount: string,
     image_src: string
+    bgcolor: string
 }
 
 const InfoCard = ({ item }: { item: cardItem }) => {
     return (
         <div className=" bg-white border-1 p-4 pt-6 pb-6 rounded-lg shadow-sm flex w-1/3">
             <div className="flex justify-center items-center w-20">
-                <div className={`h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400`}>
+                <div
+                    style={{ backgroundColor: item?.bgcolor || '#f3f4f6' }}
+                    className={`h-12 w-12 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400`}>
                     {/* <div className={`h-12 w-12 bg-${red}-500 rounded-full flex items-center justify-center shadow-md shadow-gray-400`}> */}
                     <img
                         src={item?.image_src}

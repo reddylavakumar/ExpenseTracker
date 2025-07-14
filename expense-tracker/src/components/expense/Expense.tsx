@@ -26,7 +26,7 @@ const Expense = () => {
                     </div>
                 </div>
             </div>
-            <ExpenseDialogBox open={open} onOpenChange={setOpen} />
+            {open && <ExpenseDialogBox open={open} onOpenChange={setOpen} />}
 
         </div>
     )

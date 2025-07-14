@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from "uuid"
 import { format } from "date-fns"
 import { useEffect, useState } from "react"
 import { addExpense } from "@/services/api/expenseApi"
+import useExpenseStore from "@/store/useAppStore"
 
 interface DialogBoxProps {
     open: boolean
@@ -42,6 +43,7 @@ type IncomeFormData = {
 }
 
 export function IncomeDialogBox({ open, onOpenChange }: DialogBoxProps) {
+    const { fetchExpenses } = useExpenseStore()
     const {
         register,
         handleSubmit,
@@ -72,50 +74,32 @@ export function IncomeDialogBox({ open, onOpenChange }: DialogBoxProps) {
         }
     }, [watchImage])
 
-    // const handleFormSubmit = (data: IncomeFormData) => {
-    //     const formattedData = {
-    //         id: uuidv4(),
-    //         title: data.title,
-    //         amount: data.amount,
-    //         currency: data.currency,
-    //         convertedAmount: data.convertedAmount,
-    //         isIncome: true,
-    //         category: data.category,
-    //         notes: data.notes,
-    //         date: format(data.date, "dd-MM-yyyy"),
-    //         createdAt: format(new Date(), "dd-MM-yyyy"),
-    //         image_src:
-    //             imagePreview ||
-    //             "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
-    //     }
-
-    //     console.log("Formatted Income Data:", formattedData)
-
-    //     reset()
-    //     setImagePreview(null)
-    //     onOpenChange(false)
-    // }
-
     const handleFormSubmit = async (data: IncomeFormData) => {
-        const formattedData = {
-            id: uuidv4(),
-            title: data.title,
-            amount: data.amount,
-            currency: data.currency,
-            convertedAmount: data.convertedAmount,
-            isIncome: true,
-            category: data.category,
-            notes: data.notes,
-            date: format(data.date, "dd-MM-yyyy"),
-            createdAt: format(new Date(), "dd-MM-yyyy"),
-            image_src:
-                imagePreview ??
-                "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
-        }
-
         try {
+            const incomeDate = new Date(data.date)
+            if (isNaN(incomeDate.getTime())) {
+                throw new Error("Invalid date provided")
+            }
+
+            const formattedData = {
+                id: uuidv4(),
+                title: data.title,
+                amount: data.amount,
+                currency: data.currency,
+                convertedAmount: data.convertedAmount,
+                isIncome: true,
+                category: data.category,
+                notes: data.notes,
+                date: format(incomeDate, "dd-MM-yyyy"),
+                createdAt: format(new Date(), "dd-MM-yyyy"),
+                image_src:
+                    imagePreview ??
+                    "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
+            }
+
             await addExpense(formattedData)
             console.log("Income added successfully")
+            await fetchExpenses()
 
             reset()
             setImagePreview(null)

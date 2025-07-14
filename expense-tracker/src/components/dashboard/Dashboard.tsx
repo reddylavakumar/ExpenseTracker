@@ -12,9 +12,36 @@ type cardItem = {
     bgcolor: string
 }
 const Dashboard = () => {
-    const { expenseList } = useExpenseStore();
+    const { expenseList, settings } = useExpenseStore();
+
+    console.log(expenseList, "expenseList");
+
+    console.log(settings.budgetLimit, "limit");
 
     const [InfoCardData, setInfoCardData] = useState<cardItem[]>()
+    const [isBudgetExceeded, setIsBudgetExceeded] = useState(false);
+
+    useEffect(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+
+        const totalExpense = expenseList.reduce((sum, expense) => {
+            const [day, month, year] = expense.date.split("-").map(Number);
+
+            if (month === currentMonth && year === currentYear && expense.isIncome === false) {
+                const convertedNum = Number(expense.convertedAmount);
+                return sum + (isNaN(convertedNum) ? 0 : convertedNum);
+            }
+            return sum;
+        }, 0);
+
+        if (settings.budgetLimit === "") {
+            setIsBudgetExceeded(false)
+        } else {
+            setIsBudgetExceeded(totalExpense >= (settings?.budgetLimit ?? 0));
+        }
+    }, [settings.budgetLimit]);
 
     useEffect(() => {
         const totalIncome = expenseList?.filter((item) => item?.isIncome).reduce((sum, item) => sum + Number(item.convertedAmount), 0);
@@ -31,8 +58,8 @@ const Dashboard = () => {
             id: 2,
             text: "Total Income",
             amount: totalIncome,
-            image_src: "src/assets/wallet.png",
-            bgcolor: "orange"
+            image_src: "src/assets/income.png",
+            bgcolor: "lightgreen"
 
         }
             ,
@@ -40,8 +67,8 @@ const Dashboard = () => {
             id: 3,
             text: "Total Expense",
             amount: totalExpense,
-            image_src: "src/assets/wallet.png",
-            bgcolor: "red"
+            image_src: "src/assets/spending.png",
+            bgcolor: "orange"
         }
         ]
         setInfoCardData(data)
@@ -53,6 +80,9 @@ const Dashboard = () => {
 
     return (
         <div className="p-0">
+            {isBudgetExceeded && <div className="p-3 bg-orange-400 text-white ">You have reached your monthly budget limit.
+
+            </div>}
 
             <div className="flex gap-6 mt-2">
                 {InfoCardData?.map((item) => {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import {
     Dialog,
     DialogClose,
@@ -21,12 +22,15 @@ import {
 import { DatePicker } from "@/components/reusablecomponents/Datepicker"
 import { useForm, Controller } from "react-hook-form"
 import { v4 as uuidv4 } from "uuid"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
+import { addExpense, updateExpense } from "@/services/api/expenseApi"
+import useExpenseStore from "@/store/useAppStore"
+import { getExpenseById } from "@/services/api/expenseApi"
 
 interface DialogBoxProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onSubmitData: (data: any) => void // pass final formatted data out
+    id?: string
 }
 
 type ExpenseFormData = {
@@ -37,137 +41,275 @@ type ExpenseFormData = {
     category: string
     notes: string
     date: Date
+    image?: FileList
 }
 
-export function ExpenseDialogBox({ open, onOpenChange, onSubmitData }: DialogBoxProps) {
+export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
+    const { settings, fetchExpenses } = useExpenseStore()
+    console.log(settings, "settings");
+
     const {
         register,
         handleSubmit,
         control,
-        reset,
         formState: { errors },
+        reset,
+        watch,
+        setValue,
     } = useForm<ExpenseFormData>({
         defaultValues: {
-            currency: "",
+            currency: settings?.currency ?? "",
             date: new Date(),
         },
     })
 
-    const onSubmit = (data: ExpenseFormData) => {
-        const formattedData = {
-            id: uuidv4(),
-            title: data.title,
-            amount: data.amount,
-            currency: data.currency,
-            convertedAmount: data.convertedAmount,
-            isIncome: false,
-            category: data.category,
-            notes: data.notes,
-            date: format(data.date, "dd-MM-yyyy"),
-            createdAt: format(new Date(), "dd-MM-yyyy"),
-            image_src: "https://img.freepik.com/free-photo/delicious-meal-table_23-2149372049.jpg?semt=ais_hybrid&w=740",
-        }
+    const watchImage = watch("image")
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
 
-        onSubmitData(formattedData)
-        reset()
-        onOpenChange(false)
+    useEffect(() => {
+        if (id && open) {
+            setLoading(true)
+            getExpenseById(id)
+                .then((data) => {
+                    const parsedDate = parse(data.date, "dd-MM-yyyy", new Date())
+
+                    setValue("title", data.title)
+                    setValue("amount", data.amount)
+                    setValue("currency", data.currency)
+                    setValue("convertedAmount", data.convertedAmount)
+                    setValue("category", data.category)
+                    setValue("notes", data.notes)
+                    setValue("date", parsedDate)
+
+                    setImagePreview(data.image_src)
+                })
+                .catch((err) => {
+                    console.error("Failed to fetch expense data", err)
+                })
+                .finally(() => setLoading(false))
+        } else {
+            reset()
+            setImagePreview(null)
+        }
+    }, [id, open, reset, setValue])
+
+    useEffect(() => {
+        const file = watchImage?.[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string)
+            }
+            reader.readAsDataURL(file)
+        }
+    }, [watchImage])
+
+    const handleFormSubmit = async (data: ExpenseFormData) => {
+        try {
+            const expenseDate = new Date(data.date)
+            if (isNaN(expenseDate.getTime())) {
+                throw new Error("Invalid date provided")
+            }
+
+            const formattedData = {
+                id: id ?? uuidv4(),
+                title: data.title,
+                amount: data.amount,
+                currency: data.currency,
+                convertedAmount: data.convertedAmount,
+                isIncome: false,
+                category: data.category,
+                notes: data.notes,
+                date: format(expenseDate, "dd-MM-yyyy"),
+                createdAt: id ? undefined : format(new Date(), "dd-MM-yyyy"),
+                image_src:
+                    imagePreview ??
+                    "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
+            }
+
+            if (id) {
+                // Edit 
+                await updateExpense(id, formattedData)
+                console.log("Expense updated successfully")
+            } else {
+                // Add
+                await addExpense(formattedData)
+                console.log("Expense added successfully")
+            }
+
+            await fetchExpenses()
+
+            reset()
+            setImagePreview(null)
+            onOpenChange(false)
+        } catch (error) {
+            console.error("Failed to save expense:", error)
+            alert("Something went wrong while saving the expense. Please try again.")
+        }
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+        <Dialog
+            open={open}
+            onOpenChange={(state) => {
+                onOpenChange(state)
+                if (!state) {
+                    reset()
+                    setImagePreview(null)
+                }
+            }}
+        >
+            <DialogContent className="sm:max-w-[525px]">
                 <DialogHeader>
-                    <DialogTitle>Add Expense</DialogTitle>
-                    <DialogDescription>Fill in the details to record a new expense.</DialogDescription>
+                    <DialogTitle>{id ? "Edit Expense" : "Add Expense"}</DialogTitle>
+                    <DialogDescription>
+                        {id
+                            ? "Update the details to modify the expense."
+                            : "Fill in the details to record a new Expense."}
+                    </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="title">Spent On</Label>
-                                <Input id="title" {...register("title", { required: "Title is required" })} />
-                                {errors.title && <span className="text-red-500 font-semibold text-[13px]">{errors.title.message}</span>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="amount">Amount</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    min={0}
-                                    {...register("amount", { required: "Amount is required" })}
-                                />
-                                {errors.amount && <span className="text-red-500 font-semibold text-[13px]">{errors.amount.message}</span>}
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                {loading ? (
+                    <div className="p-4 text-center">Loading...</div>
+                ) : (
+                    <form
+                        onSubmit={() => {
+                            handleSubmit(handleFormSubmit)();
+                        }} className="space-y-4">
+                        <div className="grid gap-4">
+                            {/* Title & Amount */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="title">Spent on</Label>
+                                    <Input
+                                        id="title"
+                                        {...register("title", { required: "Title is required" })}
+                                    />
+                                    {errors.title && (
+                                        <span className="text-red-500 text-sm">{errors.title.message}</span>
+                                    )}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="amount">Amount</Label>
+                                    <Input
+                                        id="amount"
+                                        type="number"
+                                        min={1}
+                                        {...register("amount", {
+                                            required: "Amount is required",
+                                            min: { value: 1, message: "Amount must be at least 1" },
+                                        })}
+                                    />
+                                    {errors.amount && (
+                                        <span className="text-red-500 text-sm">{errors.amount.message}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Currency & Converted Amount */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="currency">Currency</Label>
+                                    <Controller
+                                        name="currency"
+                                        control={control}
+                                        rules={{ required: "Currency is required" }}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Currency" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="INR">INR</SelectItem>
+                                                    <SelectItem value="DOLLAR">USD</SelectItem>
+                                                    <SelectItem value="EUR">EUR</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.currency && (
+                                        <span className="text-red-500 text-sm">{errors.currency.message}</span>
+                                    )}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="convertedAmount">Converted Amount</Label>
+                                    <Input
+                                        id="convertedAmount"
+                                        type="number"
+                                        {...register("convertedAmount", {
+                                            required: "Converted amount is required",
+                                        })}
+                                    />
+                                    {errors.convertedAmount && (
+                                        <span className="text-red-500 text-sm">{errors.convertedAmount.message}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Category & Notes */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="category">Category</Label>
+                                    <Input
+                                        id="category"
+                                        {...register("category", { required: "Category is required" })}
+                                    />
+                                    {errors.category && (
+                                        <span className="text-red-500 text-sm">{errors.category.message}</span>
+                                    )}
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="notes">Notes</Label>
+                                    <Textarea id="notes" rows={1} maxLength={200} {...register("notes")} />
+                                </div>
+                            </div>
+
+                            {/* Date Picker */}
                             <div className="grid gap-2">
-                                <Label htmlFor="currency">Currency</Label>
+                                <Label htmlFor="date">Date</Label>
                                 <Controller
+                                    name="date"
                                     control={control}
-                                    name="currency"
-                                    rules={{ required: "Currency is required" }}
                                     render={({ field }) => (
-                                        <Select onValueChange={field.onChange} value={field.value}>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Currency" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="INR">INR</SelectItem>
-                                                <SelectItem value="EUR">EUR</SelectItem>
-                                                <SelectItem value="USD">USD</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <DatePicker date={field.value} setDate={field.onChange} />
                                     )}
                                 />
-                                {errors.currency && <span className="text-red-500 font-semibold text-[13px]">{errors.currency.message}</span>}
                             </div>
+
+                            {/* Image Upload */}
                             <div className="grid gap-2">
-                                <Label htmlFor="convertedAmount">Converted Amount</Label>
-                                <Input
-                                    id="convertedAmount"
-                                    type="number"
-                                    {...register("convertedAmount", { required: "Converted amount is required" })}
-                                />
-                                {errors.convertedAmount && (
-                                    <span className="text-red-500 font-semibold text-[13px]">{errors.convertedAmount.message}</span>
+                                <Label htmlFor="image">Upload Image</Label>
+                                <Input id="image" type="file" accept="image/*" {...register("image")} />
+                                {imagePreview && (
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="rounded-md border mt-2 h-32 object-cover"
+                                    />
                                 )}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="category">Category</Label>
-                                <Input id="category" {...register("category", { required: "Category is required" })} />
-                                {errors.category && <span className="text-red-500 font-semibold text-[13px]">{errors.category.message}</span>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="notes">Notes</Label>
-                                <Textarea id="notes" rows={1} maxLength={200} {...register("notes")} />
-                            </div>
-                        </div>
+                        <DialogFooter>
+                            <DialogClose>
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    onClick={() => {
+                                        reset()
+                                        setImagePreview(null)
+                                        onOpenChange(false)
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </DialogClose>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="date">Date</Label>
-                            <Controller
-                                control={control}
-                                name="date"
-                                render={({ field }) => (
-                                    <DatePicker date={field.value} setDate={field.onChange} />
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline" type="button">
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <Button type="submit">Save changes</Button>
-                    </DialogFooter>
-                </form>
+                            <Button type="submit">{id ? "Update" : "Save changes"}</Button>
+                        </DialogFooter>
+                    </form>
+                )}
             </DialogContent>
         </Dialog>
     )
