@@ -26,6 +26,7 @@ import { format, parse } from "date-fns"
 import { addExpense, updateExpense } from "@/services/api/expenseApi"
 import useExpenseStore from "@/store/useAppStore"
 import { getExpenseById } from "@/services/api/expenseApi"
+import { toast } from "sonner"
 
 interface DialogBoxProps {
     open: boolean
@@ -132,13 +133,17 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                 // Edit 
                 await updateExpense(id, formattedData)
                 console.log("Expense updated successfully")
+                toast.success("Expense updated successfully")
             } else {
                 // Add
                 await addExpense(formattedData)
                 console.log("Expense added successfully")
+                toast.success("Expense added successfully")
+
             }
 
             await fetchExpenses()
+
 
             reset()
             setImagePreview(null)
@@ -174,9 +179,7 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                     <div className="p-4 text-center">Loading...</div>
                 ) : (
                     <form
-                        onSubmit={() => {
-                            handleSubmit(handleFormSubmit)();
-                        }} className="space-y-4">
+                        onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
                         <div className="grid gap-4">
                             {/* Title & Amount */}
                             <div className="grid grid-cols-2 gap-4">

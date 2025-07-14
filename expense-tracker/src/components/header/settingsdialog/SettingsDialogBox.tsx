@@ -58,7 +58,7 @@ export function SettingsDialogBox({ open, onOpenChange }: DialogBoxProps) {
         updateSettings(data);
         onOpenChange(false);
         console.log("inside save!!");
-        toast("Saved successfully !!")
+        toast.success("Saved successfully !!")
         reset();
     };
 

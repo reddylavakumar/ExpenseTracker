@@ -8,6 +8,7 @@ import useExpenseStore from '@/store/useAppStore';
 import { SquarePen, Trash2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ExpenseDialogBox } from '../expensedialogbox/ExpenseDialogbox';
+import { toast } from 'sonner';
 // import { deleteExpense } from '@/services/api/expenseApi';
 
 type Person = {
@@ -35,6 +36,7 @@ const Table: React.FC = () => {
             });
 
             if (response.ok) {
+                toast.success("Record deleted successfully")
                 await fetchExpenses()
                 console.log('Record deleted successfully.');
             } else {

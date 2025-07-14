@@ -3,6 +3,7 @@ import InfoCard from "../InfoCard/InfoCard"
 import Financialoverview from "./financialoverview/Financialoverview"
 import RecentTransaction from "./recenttransaction/RecentTransaction"
 import { useEffect, useState } from "react";
+import { CircleXIcon, MessageSquareWarningIcon } from "lucide-react";
 
 type cardItem = {
     id: number,
@@ -27,7 +28,7 @@ const Dashboard = () => {
         const currentYear = now.getFullYear();
 
         const totalExpense = expenseList.reduce((sum, expense) => {
-            const [day, month, year] = expense.date.split("-").map(Number);
+            const [, month, year] = expense.date.split("-").map(Number);
 
             if (month === currentMonth && year === currentYear && expense.isIncome === false) {
                 const convertedNum = Number(expense.convertedAmount);
@@ -80,9 +81,23 @@ const Dashboard = () => {
 
     return (
         <div className="p-0">
-            {isBudgetExceeded && <div className="p-3 bg-orange-400 text-white ">You have reached your monthly budget limit.
+            {isBudgetExceeded && (
+                <div className="flex items-center justify-between p-4 bg-red-100 border border-red-500 text-red-800 rounded-md shadow-sm mb-4">
+                    <div className="flex items-center space-x-2">
+                        <MessageSquareWarningIcon className="w-5 h-5 text-red-600" />
+                        <span className="text-sm font-medium">
+                            You have reached your monthly budget limit.
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => setIsBudgetExceeded(false)}
+                        className="text-red-500 hover:text-red-700 hover:cursor-pointer transition duration-150 ease-in-out"
+                    >
+                        <CircleXIcon className="w-5 h-5" />
+                    </button>
+                </div>
+            )}
 
-            </div>}
 
             <div className="flex gap-6 mt-2">
                 {InfoCardData?.map((item) => {
