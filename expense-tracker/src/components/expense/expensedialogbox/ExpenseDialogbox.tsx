@@ -1,53 +1,53 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+    DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"
-import { DatePicker } from "@/components/reusablecomponents/Datepicker"
-import { useForm, Controller } from "react-hook-form"
-import { v4 as uuidv4 } from "uuid"
-import { format, parse } from "date-fns"
-import { addExpense, updateExpense } from "@/services/api/expenseApi"
-import useExpenseStore from "@/store/useAppStore"
-import { getExpenseById } from "@/services/api/expenseApi"
-import { toast } from "sonner"
+} from "@/components/ui/select";
+import { DatePicker } from "@/components/reusablecomponents/Datepicker";
+import { useForm, Controller } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
+import { format, parse } from "date-fns";
+import useExpenseStore from "@/store/useAppStore";
+import { getExpenseById } from "@/services/api/expenseApi";
+import { toast } from "sonner";
+import { useAddExpense, useUpdateExpense } from "@/services/hooks/useExpenses";
+// import { useAddExpense, useUpdateExpense } from "@/hooks/useExpenses";
 
 interface DialogBoxProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    id?: string
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    id?: string;
 }
 
 type ExpenseFormData = {
-    title: string
-    amount: string
-    currency: string
-    convertedAmount: string
-    category: string
-    notes: string
-    date: Date
-    image?: FileList
-}
+    title: string;
+    amount: string;
+    currency: string;
+    convertedAmount: string;
+    category: string;
+    notes: string;
+    date: Date;
+    image?: FileList;
+};
 
 export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
-    const { settings, fetchExpenses } = useExpenseStore()
-    console.log(settings, "settings");
+    const { settings } = useExpenseStore();
 
     const {
         register,
@@ -62,103 +62,100 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
             currency: settings?.currency ?? "",
             date: new Date(),
         },
-    })
+    });
 
-    const watchImage = watch("image")
-    const [imagePreview, setImagePreview] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const watchImage = watch("image");
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const addExpenseMutation = useAddExpense();
+    const updateExpenseMutation = useUpdateExpense();
 
     useEffect(() => {
         if (id && open) {
-            setLoading(true)
+            setLoading(true);
             getExpenseById(id)
                 .then((data) => {
-                    const parsedDate = parse(data.date, "dd-MM-yyyy", new Date())
-
-                    setValue("title", data.title)
-                    setValue("amount", data.amount)
-                    setValue("currency", data.currency)
-                    setValue("convertedAmount", data.convertedAmount)
-                    setValue("category", data.category)
-                    setValue("notes", data.notes)
-                    setValue("date", parsedDate)
-
-                    setImagePreview(data.image_src)
+                    const parsedDate = parse(data.date, "dd-MM-yyyy", new Date());
+                    setValue("title", data.title);
+                    setValue("amount", data.amount);
+                    setValue("currency", data.currency);
+                    setValue("convertedAmount", data.convertedAmount);
+                    setValue("category", data.category);
+                    setValue("notes", data.notes);
+                    setValue("date", parsedDate);
+                    setImagePreview(data.image_src);
                 })
                 .catch((err) => {
-                    console.error("Failed to fetch expense data", err)
+                    console.error("Failed to fetch expense data", err);
                 })
-                .finally(() => setLoading(false))
+                .finally(() => setLoading(false));
         } else {
-            reset()
-            setImagePreview(null)
+            reset();
+            setImagePreview(null);
         }
-    }, [id, open, reset, setValue])
+    }, [id, open, reset, setValue]);
 
     useEffect(() => {
-        const file = watchImage?.[0]
+        const file = watchImage?.[0];
         if (file) {
-            const reader = new FileReader()
+            const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result as string)
-            }
-            reader.readAsDataURL(file)
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
-    }, [watchImage])
+    }, [watchImage]);
 
     const handleFormSubmit = async (data: ExpenseFormData) => {
-        try {
-            const expenseDate = new Date(data.date)
-            if (isNaN(expenseDate.getTime())) {
-                throw new Error("Invalid date provided")
-            }
-
-            const formattedData = {
-                id: id ?? uuidv4(),
-                title: data.title,
-                amount: data.amount,
-                currency: data.currency,
-                convertedAmount: data.convertedAmount,
-                isIncome: false,
-                category: data.category,
-                notes: data.notes,
-                date: format(expenseDate, "dd-MM-yyyy"),
-                createdAt: id ? undefined : format(new Date(), "dd-MM-yyyy"),
-                image_src:
-                    imagePreview ??
-                    "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
-            }
-
-            if (id) {
-                // Edit 
-                await updateExpense(id, formattedData)
-                console.log("Expense updated successfully")
-            } else {
-                // Add
-                await addExpense(formattedData)
-                console.log("Expense added successfully")
-            }
-
-            await fetchExpenses()
-            toast.success("Record deleted successfully")
-
-            reset()
-            setImagePreview(null)
-            onOpenChange(false)
-        } catch (error) {
-            console.error("Failed to save expense:", error)
-            alert("Something went wrong while saving the expense. Please try again.")
+        const expenseDate = new Date(data.date);
+        if (isNaN(expenseDate.getTime())) {
+            toast.error("Invalid date");
+            return;
         }
-    }
+
+        const formattedData = {
+            id: id ?? uuidv4(),
+            title: data.title,
+            amount: data.amount,
+            currency: data.currency,
+            convertedAmount: data.convertedAmount,
+            isIncome: false,
+            category: data.category,
+            notes: data.notes,
+            date: format(expenseDate, "dd-MM-yyyy"),
+            createdAt: id ? undefined : format(new Date(), "dd-MM-yyyy"),
+            image_src:
+                imagePreview ??
+                "https://img.freepik.com/free-photo/large-mixed-pizza-with-meat_140725-1274.jpg?semt=ais_hybrid&w=740",
+        };
+
+        try {
+            if (id) {
+                await updateExpenseMutation.mutateAsync({ id, data: formattedData });
+                toast.success("Expense updated successfully");
+            } else {
+                await addExpenseMutation.mutateAsync(formattedData);
+                toast.success("Expense added successfully");
+            }
+
+            reset();
+            setImagePreview(null);
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Failed to save expense:", error);
+            toast.error("Something went wrong while saving the expense.");
+        }
+    };
 
     return (
         <Dialog
             open={open}
             onOpenChange={(state) => {
-                onOpenChange(state)
+                onOpenChange(state);
                 if (!state) {
-                    reset()
-                    setImagePreview(null)
+                    reset();
+                    setImagePreview(null);
                 }
             }}
         >
@@ -176,9 +173,13 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                     <div className="p-4 text-center">Loading...</div>
                 ) : (
                     <form
-                        onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit(handleFormSubmit)(e);
+                        }}
+                        className="space-y-4"
+                    >
                         <div className="grid gap-4">
-                            {/* Title & Amount */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="title">Spent on</Label>
@@ -187,7 +188,9 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                         {...register("title", { required: "Title is required" })}
                                     />
                                     {errors.title && (
-                                        <span className="text-red-500 text-sm">{errors.title.message}</span>
+                                        <span className="text-red-500 text-sm">
+                                            {errors.title.message}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="grid gap-2">
@@ -202,12 +205,13 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                         })}
                                     />
                                     {errors.amount && (
-                                        <span className="text-red-500 text-sm">{errors.amount.message}</span>
+                                        <span className="text-red-500 text-sm">
+                                            {errors.amount.message}
+                                        </span>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Currency & Converted Amount */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="currency">Currency</Label>
@@ -229,7 +233,9 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                         )}
                                     />
                                     {errors.currency && (
-                                        <span className="text-red-500 text-sm">{errors.currency.message}</span>
+                                        <span className="text-red-500 text-sm">
+                                            {errors.currency.message}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="grid gap-2">
@@ -242,12 +248,13 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                         })}
                                     />
                                     {errors.convertedAmount && (
-                                        <span className="text-red-500 text-sm">{errors.convertedAmount.message}</span>
+                                        <span className="text-red-500 text-sm">
+                                            {errors.convertedAmount.message}
+                                        </span>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Category & Notes */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="category">Category</Label>
@@ -256,7 +263,9 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                         {...register("category", { required: "Category is required" })}
                                     />
                                     {errors.category && (
-                                        <span className="text-red-500 text-sm">{errors.category.message}</span>
+                                        <span className="text-red-500 text-sm">
+                                            {errors.category.message}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="grid gap-2">
@@ -265,7 +274,6 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                 </div>
                             </div>
 
-                            {/* Date Picker */}
                             <div className="grid gap-2">
                                 <Label htmlFor="date">Date</Label>
                                 <Controller
@@ -277,7 +285,6 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                                 />
                             </div>
 
-                            {/* Image Upload */}
                             <div className="grid gap-2">
                                 <Label htmlFor="image">Upload Image</Label>
                                 <Input id="image" type="file" accept="image/*" {...register("image")} />
@@ -292,16 +299,12 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                         </div>
 
                         <DialogFooter>
-                            <DialogClose>
-                                <Button
-                                    variant="outline"
-                                    type="button"
-                                    onClick={() => {
-                                        reset()
-                                        setImagePreview(null)
-                                        onOpenChange(false)
-                                    }}
-                                >
+                            <DialogClose asChild>
+                                <Button type="button" variant="outline" onClick={() => {
+                                    reset();
+                                    setImagePreview(null);
+                                    onOpenChange(false);
+                                }}>
                                     Cancel
                                 </Button>
                             </DialogClose>
@@ -312,5 +315,5 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
                 )}
             </DialogContent>
         </Dialog>
-    )
+    );
 }

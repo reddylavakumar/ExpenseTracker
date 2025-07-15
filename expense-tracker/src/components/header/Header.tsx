@@ -1,4 +1,4 @@
-import useExpenseStore from "@/store/useAppStore"
+// import useExpenseStore from "@/store/useAppStore"
 import { MoonIcon, Settings, SunIcon } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
@@ -6,7 +6,7 @@ import { SettingsDialogBox } from "./settingsdialog/SettingsDialogBox";
 import { useState } from "react";
 
 const Header = () => {
-    const { themeToggler, isDarkMode } = useExpenseStore();
+    // const { themeToggler, isDarkMode } = useExpenseStore();
     const [open, setOpen] = useState(false)
 
 
@@ -25,7 +25,7 @@ const Header = () => {
                             <p>Settings</p>
                         </TooltipContent>
                     </Tooltip>
-                    <Tooltip>
+                    {/* <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant={"outline"} className="hover:cursor-pointer" onClick={() => themeToggler()} >
 
@@ -36,7 +36,7 @@ const Header = () => {
                         <TooltipContent>
                             {isDarkMode ? <p>Light Theme</p> : <p><p>Dark Theme</p></p>}
                         </TooltipContent>
-                    </Tooltip>
+                    </Tooltip> */}
                 </div>
             </div>
             <SettingsDialogBox open={open} onOpenChange={setOpen} />
