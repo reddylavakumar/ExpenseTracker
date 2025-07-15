@@ -15,11 +15,6 @@ type cardItem = {
 }
 const Dashboard = () => {
     const { expenseList, settings } = useExpenseStore();
-
-    console.log(expenseList, "expenseList");
-
-    console.log(settings.budgetLimit, "limit");
-
     const [InfoCardData, setInfoCardData] = useState<cardItem[]>()
     const [isBudgetExceeded, setIsBudgetExceeded] = useState(false);
 

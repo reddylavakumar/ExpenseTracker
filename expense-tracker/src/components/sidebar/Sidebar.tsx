@@ -1,7 +1,14 @@
+import useExpenseStore from "@/store/useAppStore";
 import { Link } from "@tanstack/react-router";
 import { BanknoteArrowDownIcon, BanknoteArrowUpIcon, LayoutDashboardIcon } from "lucide-react";
+import { useEffect } from "react";
 
 const Sidebar = () => {
+    const { expenseList, fetchExpenses } = useExpenseStore()
+
+    useEffect(() => {
+        fetchExpenses()
+    }, [expenseList])
     return (
 
         <div className="w-50 bg-white-900 text-black p-4 space-y-4">
