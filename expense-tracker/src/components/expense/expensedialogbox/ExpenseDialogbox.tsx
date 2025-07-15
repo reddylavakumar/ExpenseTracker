@@ -47,7 +47,7 @@ type ExpenseFormData = {
 };
 
 export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
-    const { settings } = useExpenseStore();
+    const { settings, fetchExpenses } = useExpenseStore();
 
     const {
         register,
@@ -133,18 +133,19 @@ export function ExpenseDialogBox({ open, onOpenChange, id }: DialogBoxProps) {
         try {
             if (id) {
                 await updateExpenseMutation.mutateAsync({ id, data: formattedData });
+
                 toast.success("Expense updated successfully");
             } else {
                 await addExpenseMutation.mutateAsync(formattedData);
                 toast.success("Expense added successfully");
             }
-
             reset();
             setImagePreview(null);
             onOpenChange(false);
+            await fetchExpenses()
         } catch (error) {
             console.error("Failed to save expense:", error);
-            toast.error("Something went wrong while saving the expense.");
+            // toast.error("Something went wrong while saving the expense.");
         }
     };
 

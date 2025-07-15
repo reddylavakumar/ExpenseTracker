@@ -98,7 +98,6 @@ export function IncomeDialogBox({ open, onOpenChange }: DialogBoxProps) {
             }
 
             await addExpense(formattedData)
-            console.log("Income added successfully")
             await fetchExpenses()
 
             reset()

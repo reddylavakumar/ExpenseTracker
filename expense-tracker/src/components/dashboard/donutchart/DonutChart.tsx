@@ -17,13 +17,10 @@ const DonutChart: React.FC = () => {
 
     useEffect(() => {
         const totalIncome = expenseList?.filter((item) => item?.isIncome).reduce((sum, item) => sum + Number(item.convertedAmount), 0);
-        console.log(totalIncome, "total income");
 
         const totalExpense = expenseList?.filter((item) => !(item?.isIncome)).reduce((sum, item) => sum + Number(item.convertedAmount), 0)
-        console.log(totalExpense, "total expense");
 
         const totalBalance = totalIncome - totalExpense
-        console.log(totalBalance, "total balance");
 
         let data = [{
             id: 1,

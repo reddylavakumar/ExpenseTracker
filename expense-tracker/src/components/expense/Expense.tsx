@@ -12,9 +12,7 @@ const Expense = () => {
 
 
     const handleDownload = () => {
-        console.log("inside download");
         if (!expenseList || expenseList.length === 0) {
-            console.log("No expense data to download");
             return;
         }
         const expenseData = expenseList.filter((item) => item?.isIncome === false);
@@ -25,7 +23,6 @@ const Expense = () => {
             category: item?.category || 'Uncategorized',
         }));
 
-        console.log(requiredData, 'Required Data for Download');
 
         const ws = XLSX.utils.json_to_sheet(requiredData);
 

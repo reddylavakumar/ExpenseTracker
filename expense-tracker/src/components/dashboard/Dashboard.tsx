@@ -58,8 +58,7 @@ const Dashboard = () => {
             image_src: "src/assets/income.png",
             bgcolor: "lightgreen"
 
-        }
-            ,
+        },
         {
             id: 3,
             text: "Total Expense",
@@ -71,7 +70,6 @@ const Dashboard = () => {
         setInfoCardData(data)
     }, [])
 
-    console.log(expenseList, "expese list");
 
 
 

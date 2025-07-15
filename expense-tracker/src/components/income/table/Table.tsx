@@ -39,7 +39,6 @@ const Table: React.FC = () => {
 
             if (response.ok) {
                 await fetchExpenses()
-                console.log('Record deleted successfully.');
             } else {
                 console.error(`Failed to delete the record. Status: ${response.status}`);
             }
@@ -58,25 +57,13 @@ const Table: React.FC = () => {
                 enableColumnActions: false,
                 Cell: ({ row }) => (
                     <div className='flex gap-5'>
-                        <Button type="button" variant={"secondary"} className='bg-blue-200 hover:cursor-pointer hover:bg-blue-300 transition-all ease-in'
-                        //  onClick={() => handleEdit(row?.original?.id)
-                        // }
-                        >
-                            <SquarePen />
-                        </Button>
-                        {/* <Button type="button" variant={"secondary"} className='bg-red-200 hover:cursor-pointer hover:bg-red-300 transition-all ease-in'
-                            onClick={() => handleDelete(row.original.id)}
-                        >
-                            <Trash2Icon />
-                        </Button> */}
                         <Button
                             type="button"
                             variant="secondary"
                             className="bg-red-200 hover:cursor-pointer hover:bg-red-300 transition-all ease-in"
                             onClick={(e) => {
-                                e.preventDefault(); // prevents form submit
-                                e.stopPropagation(); // prevents bubbling
-                                console.log("Delete clicked:", row.original.id);
+                                e.preventDefault();
+                                e.stopPropagation();
                                 handleDelete(row.original.id);
                             }}
                         >

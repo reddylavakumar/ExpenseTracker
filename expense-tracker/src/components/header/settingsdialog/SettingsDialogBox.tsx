@@ -57,7 +57,6 @@ export function SettingsDialogBox({ open, onOpenChange }: DialogBoxProps) {
     const handleSettingsSubmit = (data: SettingsFormData) => {
         updateSettings(data);
         onOpenChange(false);
-        console.log("inside save!!");
         toast.success("Saved successfully !!")
         reset();
     };

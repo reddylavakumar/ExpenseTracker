@@ -15,7 +15,7 @@ function RootComponent() {
         <div className="bg-white-500 p-1 border-r-2 overflow-auto scrollbar-thin w-1/6 flex justify-center">
           <Sidebar />
         </div>
-        <main className="flex-1 bg-gray-100 p-4 h-[94vh] overflow-auto scrollbar-thin">
+        <main className="flex-1 bg-gray-100 p-4 h-[92vh] overflow-auto scrollbar-thin">
           <Outlet />
         </main>
         <Toaster position="top-center" richColors />

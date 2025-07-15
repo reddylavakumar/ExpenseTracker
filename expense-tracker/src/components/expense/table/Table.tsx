@@ -15,7 +15,8 @@ type Person = {
     image: string;
     incomeFrom: string;
     Amount: number;
-    id: string
+    id: string;
+    category: string
 };
 
 const Table: React.FC = () => {
@@ -38,9 +39,7 @@ const Table: React.FC = () => {
             if (response.ok) {
                 toast.success("Record deleted successfully")
                 await fetchExpenses()
-                console.log('Record deleted successfully.');
             } else {
-                console.error(`Failed to delete the record. Status: ${response.status}`);
             }
         } catch (error) {
             console.error('Error while deleting the record:', error);
@@ -54,6 +53,7 @@ const Table: React.FC = () => {
             id: item?.id,
             image: item?.image_src || '',
             incomeFrom: item?.title || '',
+            category: item?.category || '',
             Amount: parseFloat(item?.convertedAmount || item?.amount || '0'),
         }));
         setData(list);
@@ -63,6 +63,16 @@ const Table: React.FC = () => {
         () => [
             { accessorKey: 'incomeFrom', header: 'Spent On' },
             { accessorKey: 'Amount', header: 'Amount' },
+            {
+                accessorKey: 'category', header: 'Category',
+                Cell: ({ row }) => (
+                    <div>
+                        <span className=' bg-green-500 p-2 rounded-lg text-white'>
+                            {row.original.category}
+                        </span>
+                    </div>
+                ),
+            },
             {
                 accessorKey: 'Action', header: 'Action',
                 enableSorting: false,
